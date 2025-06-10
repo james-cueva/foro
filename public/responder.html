@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administrador</title>
+</head>
+<body>
+  <h1>🎯 Panel de Respuestas del Administrador</h1>
+
+  <div id="lista-posts"></div>
+
+  <script>
+    async function cargarPosts() {
+      const postsRes = await fetch('/api/posts');
+      const respuestasRes = await fetch('/api/respuestas');
+
+      const posts = await postsRes.json();
+      const respuestas = await respuestasRes.json();
+
+      const contenedor = document.getElementById('lista-posts');
+      contenedor.innerHTML = '';
+
+      posts.forEach(post => {
+        const div = document.createElement('div');
+        div.style.border = '1px solid #ccc';
+        div.style.padding = '10px';
+        div.style.marginBottom = '20px';
+
+        div.innerHTML = `
+          <h3>📝 Asunto: ${post.asunto}</h3>
+          <p>🗒️ Descripción: ${post.descripcion}</p>
+          <h4>📨 Respuestas existentes:</h4>
+        `;
+
+        // Mostrar respuestas existentes
+        const respuestasDelPost = respuestas.filter(r => r.postId === post._id);
+        if (respuestasDelPost.length > 0) {
+          respuestasDelPost.forEach(r => {
+            div.innerHTML += `
+              <p>🎫 Ticket: ${r.numeroTicket || 'Sin número'}</p>
+              <p>💬 ${r.respuesta}</p>
+              <hr/>
+            `;
+          });
+        } else {
+          div.innerHTML += `<p>❗ Aún no tiene respuestas</p>`;
+        }
+
+        // Formulario para responder
+        const form = document.createElement('form');
+        form.innerHTML = `
+          <textarea name="respuesta" rows="2" cols="50" placeholder="Escribe una respuesta..." required></textarea><br>
+          <button type="submit">Responder</button>
+        `;
+
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const respuestaTexto = form.querySelector('textarea').value;
+
+          const res = await fetch('/api/respuestas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: post._id, respuesta: respuestaTexto })
+          });
+
+          if (res.ok) {
+            alert('✅ Respuesta enviada correctamente');
+            cargarPosts();
+          } else {
+            alert('❌ Error al enviar la respuesta');
+          }
+        });
+
+        div.appendChild(form);
+        contenedor.appendChild(div);
+      });
+    }
+
+    cargarPosts();
+  </script>
+</body>
+</html>

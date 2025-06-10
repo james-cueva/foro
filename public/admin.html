@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel del Administrador</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background: #2c3e50;
+      color: white;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    #cerrar-sesion {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    #cerrar-sesion:hover {
+      background-color: #c0392b;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+      border-left: 5px solid #4CAF50;
+    }
+
+    li h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    li p {
+      margin: 8px 0;
+      color: #555;
+    }
+
+    .respuesta {
+      background-color: #e9f7ef;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 4px solid #28a745;
+      border-radius: 6px;
+    }
+
+    .respuesta p {
+      margin: 6px 0;
+      color: #2c3e50;
+    }
+
+    form.form-respuesta {
+      margin-top: 15px;
+    }
+
+    form textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      transition: border 0.3s;
+    }
+
+    form textarea:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
+    form button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    form button:hover {
+      background-color: #45a049;
+    }
+
+    small {
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Panel de Administración - Soporte Técnico</h1>
+    <button id="cerrar-sesion">Cerrar sesión</button>
+  </div>
+
+  <div class="container">
+    <ul id="lista-posts"></ul>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const lista = document.getElementById('lista-posts');
+
+    if (!token) {
+      alert('Primero debes iniciar sesión');
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('cerrar-sesion').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
+
+    async function obtenerTodosLosPosts() {
+      const res = await fetch('/api/post/todos', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      const posts = await res.json();
+      lista.innerHTML = '';
+
+      posts.forEach(post => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <h3>${post.asunto}</h3>
+          <p>${post.descripcion}</p>
+          <p><small><strong>Usuario:</strong> ${post.usuario?.email || 'No disponible'}</small></p>
+          <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
+        `;
+
+        if (!post.respuesta) {
+          li.innerHTML += `
+            <form class="form-respuesta" data-id="${post._id}">
+              <textarea placeholder="Escribe una respuesta..." required></textarea>
+              <button type="submit">Responder</button>
+            </form>
+          `;
+        } else {
+          li.innerHTML += `
+            <div class="respuesta">
+              <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
+              <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
+              <p><small><em>Ticket: <strong>${post.respuesta.ticket}</strong></em></small></p>
+            </div>
+          `;
+        }
+
+        lista.appendChild(li);
+      });
+    }
+
+    lista.addEventListener('submit', async function(e) {
+      if (e.target.classList.contains('form-respuesta')) {
+        e.preventDefault();
+        const id = e.target.getAttribute('data-id');
+        const mensaje = e.target.querySelector('textarea').value;
+
+        const res = await fetch(`/api/post/${id}/responder`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ mensaje })
+        });
+
+        if (res.ok) {
+          alert('✅ Respuesta enviada correctamente.');
+          obtenerTodosLosPosts();
+        } else {
+          alert('❌ Error al enviar respuesta.');
+        }
+      }
+    });
+
+    obtenerTodosLosPosts();
+  </script>
+</body>
+</html>

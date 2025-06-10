@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Usuario</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background: #2c3e50;
+      color: white;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form input,
+    form textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border 0.3s;
+    }
+
+    form input:focus,
+    form textarea:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
+    form button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    form button:hover {
+      background-color: #45a049;
+    }
+
+    #cerrar-sesion {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    #cerrar-sesion:hover {
+      background-color: #c0392b;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #fdfdfd;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 5px solid #4CAF50;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    li p {
+      margin: 5px 0;
+    }
+
+    .respuesta {
+      background: #e9f7ef;
+      border-left: 4px solid #2ecc71;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 5px;
+    }
+
+    .respuesta p {
+      margin: 5px 0;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Panel de Usuario - Soporte Técnico</h1>
+  </div>
+
+  <button id="cerrar-sesion">Cerrar sesión</button>
+
+  <div class="container">
+    <h2>Crear Nuevo Post</h2>
+    <form id="form-post">
+      <input type="text" placeholder="Asunto" id="asunto" required>
+      <textarea placeholder="Descripción del problema o consulta" id="descripcion" rows="5" required></textarea>
+      <button type="submit">Crear Post</button>
+    </form>
+
+    <h2>Mis Posts</h2>
+    <ul id="lista-posts"></ul>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Primero debes iniciar sesión');
+      window.location.href = '/login.html';
+    }
+
+    document.getElementById('cerrar-sesion').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      alert('Sesión cerrada');
+      window.location.href = '/login.html';
+    });
+
+    document.getElementById('form-post').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const asunto = document.getElementById('asunto').value;
+      const descripcion = document.getElementById('descripcion').value;
+
+      const res = await fetch('/api/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ asunto, descripcion })
+      });
+
+      if (res.ok) {
+        alert('✅ Post creado');
+        document.getElementById('form-post').reset();
+        obtenerMisPosts();
+      } else {
+        alert('❌ Error al crear el post');
+      }
+    });
+
+    async function obtenerMisPosts() {
+      const res = await fetch('/api/post/mis-posts', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      const posts = await res.json();
+      const lista = document.getElementById('lista-posts');
+      lista.innerHTML = '';
+
+      posts.forEach(post => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <p><strong>Asunto:</strong> ${post.asunto}</p>
+          <p><strong>Descripción:</strong> ${post.descripcion}</p>
+          <p><em>Creado: ${new Date(post.creado).toLocaleString()}</em></p>
+        `;
+
+        if (post.respuesta) {
+          li.innerHTML += `
+            <div class="respuesta">
+              <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
+              <p><em>Ticket:</em> ${post.respuesta.ticket}</p>
+              <p><small>${new Date(post.respuesta.creado).toLocaleString()}</small></p>
+              <p><em>Puede hacer seguimiento mediante el ticket <strong>${post.respuesta.ticket}</strong>.</em></p>
+              <p>Saludos cordiales,<br><strong>Administración</strong></p>
+            </div>
+          `;
+        }
+
+        lista.appendChild(li);
+      });
+    }
+
+    obtenerMisPosts();
+  </script>
+</body>
+</html>
