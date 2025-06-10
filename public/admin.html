@@ -143,83 +143,85 @@
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    const lista = document.getElementById('lista-posts');
+  const token = localStorage.getItem('token');
+  const lista = document.getElementById('lista-posts');
 
-    if (!token) {
-      alert('Primero debes iniciar sesión');
-      window.location.href = 'login.html';
-    }
+  const API_URL = 'https://foro-1bo4.onrender.com';
 
-    document.getElementById('cerrar-sesion').addEventListener('click', () => {
-      localStorage.removeItem('token');
-      window.location.href = 'login.html';
-    });
+  if (!token) {
+    alert('Primero debes iniciar sesión');
+    window.location.href = 'login.html';
+  }
 
-    async function obtenerTodosLosPosts() {
-      const res = await fetch('/api/post/todos', {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-      const posts = await res.json();
-      lista.innerHTML = '';
+  document.getElementById('cerrar-sesion').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+  });
 
-      posts.forEach(post => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <h3>${post.asunto}</h3>
-          <p>${post.descripcion}</p>
-          <p><small><strong>Usuario:</strong> ${post.usuario?.email || 'No disponible'}</small></p>
-          <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
-        `;
-
-        if (!post.respuesta) {
-          li.innerHTML += `
-            <form class="form-respuesta" data-id="${post._id}">
-              <textarea placeholder="Escribe una respuesta..." required></textarea>
-              <button type="submit">Responder</button>
-            </form>
-          `;
-        } else {
-          li.innerHTML += `
-            <div class="respuesta">
-              <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
-              <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
-              <p><small><em>Ticket: <strong>${post.respuesta.ticket}</strong></em></small></p>
-            </div>
-          `;
-        }
-
-        lista.appendChild(li);
-      });
-    }
-
-    lista.addEventListener('submit', async function(e) {
-      if (e.target.classList.contains('form-respuesta')) {
-        e.preventDefault();
-        const id = e.target.getAttribute('data-id');
-        const mensaje = e.target.querySelector('textarea').value;
-
-        const res = await fetch(`/api/post/${id}/responder`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ mensaje })
-        });
-
-        if (res.ok) {
-          alert('✅ Respuesta enviada correctamente.');
-          obtenerTodosLosPosts();
-        } else {
-          alert('❌ Error al enviar respuesta.');
-        }
+  async function obtenerTodosLosPosts() {
+    const res = await fetch(`${API_URL}/api/post/todos`, {
+      headers: {
+        'Authorization': 'Bearer ' + token
       }
     });
+    const posts = await res.json();
+    lista.innerHTML = '';
 
-    obtenerTodosLosPosts();
-  </script>
+    posts.forEach(post => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <h3>${post.asunto}</h3>
+        <p>${post.descripcion}</p>
+        <p><small><strong>Usuario:</strong> ${post.usuario?.correo || 'No disponible'}</small></p>
+        <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
+      `;
+
+      if (!post.respuesta) {
+        li.innerHTML += `
+          <form class="form-respuesta" data-id="${post._id}">
+            <textarea placeholder="Escribe una respuesta..." required></textarea>
+            <button type="submit">Responder</button>
+          </form>
+        `;
+      } else {
+        li.innerHTML += `
+          <div class="respuesta">
+            <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
+            <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
+            <p><small><em>Ticket: <strong>${post.respuesta.ticket}</strong></em></small></p>
+          </div>
+        `;
+      }
+
+      lista.appendChild(li);
+    });
+  }
+
+  lista.addEventListener('submit', async function(e) {
+    if (e.target.classList.contains('form-respuesta')) {
+      e.preventDefault();
+      const id = e.target.getAttribute('data-id');
+      const mensaje = e.target.querySelector('textarea').value;
+
+      const res = await fetch(`${API_URL}/api/post/${id}/responder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ mensaje })
+      });
+
+      if (res.ok) {
+        alert('✅ Respuesta enviada correctamente.');
+        obtenerTodosLosPosts();
+      } else {
+        alert('❌ Error al enviar respuesta.');
+      }
+    }
+  });
+
+  obtenerTodosLosPosts();
+</script>
 </body>
 </html>

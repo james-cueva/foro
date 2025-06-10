@@ -1,85 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Foro de Soporte</title>
-</head>
-<body>
-  <h1>📋 Lista de Posts</h1>
-
-  <!-- Formulario para crear nuevos posts -->
-  <h2>✏️ Crear nuevo post</h2>
-  <form id="formulario-post">
-    <label>Asunto:</label><br>
-    <input type="text" id="asunto" required /><br>
-    <label>Descripción:</label><br>
-    <textarea id="descripcion" required></textarea><br>
-    <button type="submit">Crear Post</button>
-  </form>
-
-  <hr>
-
-  <!-- Lista de posts y respuestas -->
-  <div id="lista-posts"></div>
-
-  <script>
-    async function cargarPosts() {
-      const postsRes = await fetch('/api/posts');
-      const respuestasRes = await fetch('/api/respuestas');
-
-      const posts = await postsRes.json();
-      const respuestas = await respuestasRes.json();
-
-      const contenedor = document.getElementById('lista-posts');
-      contenedor.innerHTML = '';
-
-      posts.forEach(post => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-          <h3>📝 Asunto: ${post.asunto}</h3>
-          <p>🗒️ Descripción: ${post.descripcion}</p>
-        `;
-
-        const respuestasDelPost = respuestas.filter(r => r.postId === post._id);
-        if (respuestasDelPost.length > 0) {
-          div.innerHTML += `<h4>📨 Respuestas:</h4>`;
-          respuestasDelPost.forEach(r => {
-            div.innerHTML += `
-              <p>🎫 Ticket: ${r.numeroTicket}</p>
-              <p>💬 ${r.respuesta}</p>
-              <hr/>
-            `;
-          });
-        }
-
-        contenedor.appendChild(div);
-        contenedor.appendChild(document.createElement('hr'));
-      });
-    }
-
-    // Evento para enviar formulario de nuevo post
-    document.getElementById('formulario-post').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const asunto = document.getElementById('asunto').value;
-      const descripcion = document.getElementById('descripcion').value;
-
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ asunto, descripcion })
-      });
-
-      if (res.ok) {
-        alert('✅ Post creado correctamente');
-        document.getElementById('formulario-post').reset();
-        cargarPosts();
-      } else {
-        alert('❌ Error al crear el post');
-      }
-    });
-
-    cargarPosts();
-  </script>
-</body>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; URL='login.html'" />
+  </head>
+  <body>
+    <p>Redireccionando a <a href="login.html">login</a>...</p>
+  </body>
 </html>

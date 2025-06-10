@@ -111,6 +111,8 @@
   </div>
 
   <script>
+    const API_URL = 'https://foro-1bo4.onrender.com';
+
     document.getElementById('form-registro').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -118,7 +120,7 @@
       const password = document.getElementById('password').value;
 
       try {
-        const res = await fetch('/api/auth/registro', {
+        const res = await fetch(`${API_URL}/api/auth/registro`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

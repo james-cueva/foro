@@ -138,44 +138,45 @@
   </div>
 
   <script>
-    const form = document.getElementById('formLogin');
-    const errorLogin = document.getElementById('errorLogin');
+  const form = document.getElementById('formLogin');
+  const errorLogin = document.getElementById('errorLogin');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorLogin.textContent = '';
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorLogin.textContent = '';
 
-      const correo = document.getElementById('correo').value;
-      const password = document.getElementById('password').value;
+    const correo = document.getElementById('correo').value;
+    const password = document.getElementById('password').value;
 
-      try {
-        const res = await fetch('http://localhost:3000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ correo, password })
-        });
+    try {
+      const res = await fetch('https://foro-1bo4.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ correo, password })
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Error de red o del servidor');
-        }
-
-        localStorage.setItem('token', data.token);
-
-        const payload = JSON.parse(atob(data.token.split('.')[1]));
-        if (payload.esAdmin) {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'panel.html';
-        }
-
-      } catch (err) {
-        errorLogin.textContent = err.message;
+      if (!res.ok) {
+        throw new Error(data.error || 'Error de red o del servidor');
       }
-    });
-  </script>
+
+      localStorage.setItem('token', data.token);
+
+      const payload = JSON.parse(atob(data.token.split('.')[1]));
+      if (payload.esAdmin) {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'panel.html';
+      }
+
+    } catch (err) {
+      errorLogin.textContent = err.message;
+    }
+  });
+</script>
+
 </body>
 </html>

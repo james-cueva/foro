@@ -7,8 +7,6 @@ const path = require('path');
 // Importación de rutas
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/post');
-const respuestaRoutes = require('./routes/respuestas');
-const usuarioRoutes = require('./routes/usuarios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,8 +25,6 @@ mongoose.connect(process.env.MONGO_URI)
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/post', postRoutes);
-app.use('/api/respuestas', respuestaRoutes);
-app.use('/', usuarioRoutes);
 
 // Ruta de prueba
 app.get('/prueba-directa', (req, res) => {

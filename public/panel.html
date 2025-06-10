@@ -146,75 +146,83 @@
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Primero debes iniciar sesión');
-      window.location.href = '/login.html';
+  const API_URL = 'https://foro-1bo4.onrender.com';
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    alert('Primero debes iniciar sesión');
+    window.location.href = '/login.html';
+  }
+
+  document.getElementById('cerrar-sesion').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    alert('Sesión cerrada');
+    window.location.href = '/login.html';
+  });
+
+  document.getElementById('form-post').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const asunto = document.getElementById('asunto').value;
+    const descripcion = document.getElementById('descripcion').value;
+
+    const res = await fetch(`${API_URL}/api/post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ asunto, descripcion })
+    });
+
+    if (res.ok) {
+      alert('✅ Post creado');
+      document.getElementById('form-post').reset();
+      obtenerMisPosts();
+    } else {
+      alert('❌ Error al crear el post');
+    }
+  });
+
+  async function obtenerMisPosts() {
+    const res = await fetch(`${API_URL}/api/post/mis-posts`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (!res.ok) {
+      alert('❌ Error al obtener tus posts');
+      return;
     }
 
-    document.getElementById('cerrar-sesion').addEventListener('click', () => {
-      localStorage.removeItem('token');
-      alert('Sesión cerrada');
-      window.location.href = '/login.html';
-    });
+    const posts = await res.json();
+    const lista = document.getElementById('lista-posts');
+    lista.innerHTML = '';
 
-    document.getElementById('form-post').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const asunto = document.getElementById('asunto').value;
-      const descripcion = document.getElementById('descripcion').value;
+    posts.forEach(post => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <p><strong>Asunto:</strong> ${post.asunto}</p>
+        <p><strong>Descripción:</strong> ${post.descripcion}</p>
+        <p><em>Creado: ${new Date(post.creado).toLocaleString()}</em></p>
+      `;
 
-      const res = await fetch('/api/post', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ asunto, descripcion })
-      });
-
-      if (res.ok) {
-        alert('✅ Post creado');
-        document.getElementById('form-post').reset();
-        obtenerMisPosts();
-      } else {
-        alert('❌ Error al crear el post');
-      }
-    });
-
-    async function obtenerMisPosts() {
-      const res = await fetch('/api/post/mis-posts', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-
-      const posts = await res.json();
-      const lista = document.getElementById('lista-posts');
-      lista.innerHTML = '';
-
-      posts.forEach(post => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <p><strong>Asunto:</strong> ${post.asunto}</p>
-          <p><strong>Descripción:</strong> ${post.descripcion}</p>
-          <p><em>Creado: ${new Date(post.creado).toLocaleString()}</em></p>
+      if (post.respuesta) {
+        li.innerHTML += `
+          <div class="respuesta">
+            <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
+            <p><em>Ticket:</em> ${post.respuesta.ticket}</p>
+            <p><small>${new Date(post.respuesta.creado).toLocaleString()}</small></p>
+            <p><em>Puede hacer seguimiento mediante el ticket <strong>${post.respuesta.ticket}</strong>.</em></p>
+            <p>Saludos cordiales,<br><strong>Administración</strong></p>
+          </div>
         `;
+      }
 
-        if (post.respuesta) {
-          li.innerHTML += `
-            <div class="respuesta">
-              <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
-              <p><em>Ticket:</em> ${post.respuesta.ticket}</p>
-              <p><small>${new Date(post.respuesta.creado).toLocaleString()}</small></p>
-              <p><em>Puede hacer seguimiento mediante el ticket <strong>${post.respuesta.ticket}</strong>.</em></p>
-              <p>Saludos cordiales,<br><strong>Administración</strong></p>
-            </div>
-          `;
-        }
+      lista.appendChild(li);
+    });
+  }
 
-        lista.appendChild(li);
-      });
-    }
+  obtenerMisPosts();
+</script>
 
-    obtenerMisPosts();
-  </script>
 </body>
 </html>
