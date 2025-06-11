@@ -3,225 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel del Administrador</title>
+  <title>Panel de Administrador - Soporte Técnico</title>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f7f9;
-      margin: 0;
-      padding: 0;
-    }
-
-    .header {
-      background: #2c3e50;
-      color: white;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      position: relative;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
-
-    #cerrar-sesion {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #e74c3c;
-      border: none;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s;
-    }
-
-    #cerrar-sesion:hover {
-      background-color: #c0392b;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      background: #ffffff;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-      border-left: 5px solid #4CAF50;
-    }
-
-    li h3 {
-      margin-top: 0;
-      color: #333;
-    }
-
-    li p {
-      margin: 8px 0;
-      color: #555;
-    }
-
-    .respuesta {
-      background-color: #e9f7ef;
-      padding: 15px;
-      margin-top: 15px;
-      border-left: 4px solid #28a745;
-      border-radius: 6px;
-    }
-
-    .respuesta p {
-      margin: 6px 0;
-      color: #2c3e50;
-    }
-
-    form.form-respuesta {
-      margin-top: 15px;
-    }
-
-    form textarea {
-      width: 100%;
-      height: 90px;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      resize: vertical;
-      transition: border 0.3s;
-    }
-
-    form textarea:focus {
-      border-color: #4CAF50;
-      outline: none;
-    }
-
-    form button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    form button:hover {
-      background-color: #45a049;
-    }
-
-    small {
-      color: #777;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 0; }
+    .header { background: #2c3e50; color: white; padding: 25px; text-align: center; position: relative; }
+    #cerrar-sesion { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; }
+    #cerrar-sesion:hover { background: #c0392b; }
+    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    ul { list-style: none; padding: 0; }
+    li { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,.05); border-left: 5px solid #4CAF50; }
+    li h3 { margin-top: 0; color: #333; }
+    li p { margin: 8px 0; color: #555; }
+    .respuesta { background: #e9f7ef; padding: 15px; margin-top: 15px; border-left: 4px solid #28a745; border-radius: 6px; }
+    .respuesta p { margin: 6px 0; color: #2c3e50; }
+    .form-respuesta { margin-top: 15px; }
+    .ql-toolbar { background: #fafafa; border-radius: 4px 4px 0 0; }
+    .ql-container { height: 150px; border-radius: 0 0 4px 4px; }
+    form button { margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
+    form button:hover { background: #45a049; }
   </style>
 </head>
 <body>
-
   <div class="header">
     <h1>Panel de Administración - Soporte Técnico</h1>
     <button id="cerrar-sesion">Cerrar sesión</button>
   </div>
-
   <div class="container">
     <ul id="lista-posts"></ul>
   </div>
 
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
   <script>
-  const token = localStorage.getItem('token');
-  const lista = document.getElementById('lista-posts');
+    const token = localStorage.getItem('token');
+    const API = window.location.origin;
+    const lista = document.getElementById('lista-posts');
 
-  const API_URL = 'https://foro-1bo4.onrender.com';
+    if (!token) window.location.href = 'login.html';
+    document.getElementById('cerrar-sesion').onclick = () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    };
 
-  if (!token) {
-    alert('Primero debes iniciar sesión');
-    window.location.href = 'login.html';
-  }
-
-  document.getElementById('cerrar-sesion').addEventListener('click', () => {
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
-  });
-
-  async function obtenerTodosLosPosts() {
-    const res = await fetch(`${API_URL}/api/post/todos`, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
-    const posts = await res.json();
-    lista.innerHTML = '';
-
-    posts.forEach(post => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <h3>${post.asunto}</h3>
-        <p>${post.descripcion}</p>
-        <p><small><strong>Usuario:</strong> ${post.usuario?.correo || 'No disponible'}</small></p>
-        <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
-      `;
-
-      if (!post.respuesta) {
-        li.innerHTML += `
-          <form class="form-respuesta" data-id="${post._id}">
-            <textarea placeholder="Escribe una respuesta..." required></textarea>
-            <button type="submit">Responder</button>
-          </form>
-        `;
-      } else {
-        li.innerHTML += `
-          <div class="respuesta">
-            <p><strong>Respuesta:</strong> ${post.respuesta.mensaje}</p>
-            <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
-            <p><small><em>Ticket: <strong>${post.respuesta.ticket}</strong></em></small></p>
-          </div>
-        `;
-      }
-
-      lista.appendChild(li);
-    });
-  }
-
-  lista.addEventListener('submit', async function(e) {
-    if (e.target.classList.contains('form-respuesta')) {
-      e.preventDefault();
-      const id = e.target.getAttribute('data-id');
-      const mensaje = e.target.querySelector('textarea').value;
-
-      const res = await fetch(`${API_URL}/api/post/${id}/responder`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ mensaje })
+    function crearEditor(div) {
+      return new Quill(div, {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }, { 'size': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image', 'video'],
+            ['clean']
+          ]
+        }
       });
-
-      if (res.ok) {
-        alert('✅ Respuesta enviada correctamente.');
-        obtenerTodosLosPosts();
-      } else {
-        alert('❌ Error al enviar respuesta.');
-      }
     }
-  });
 
-  obtenerTodosLosPosts();
-</script>
+    async function cargarPosts() {
+      const res = await fetch(`${API}/api/post/todos`, {
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      const posts = await res.json();
+      lista.innerHTML = '';
+      posts.forEach(post => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <h3>${post.asunto}</h3>
+          <p>${post.descripcion}</p>
+          <p><small><strong>Usuario:</strong> ${post.usuario?.correo || 'No disponible'}</small></p>
+          <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
+        `;
+        if (!post.respuesta) {
+          const form = document.createElement('form');
+          form.className = 'form-respuesta';
+          form.dataset.id = post._id;
+
+          const editorDiv = document.createElement('div');
+          editorDiv.style.margin = '10px 0';
+          form.appendChild(editorDiv);
+
+          const button = document.createElement('button');
+          button.type = 'submit';
+          button.innerText = 'Responder';
+          form.appendChild(button);
+
+          const quill = crearEditor(editorDiv);
+
+          form.onsubmit = async e => {
+            e.preventDefault();
+            const mensaje = quill.root.innerHTML;
+            const r = await fetch(`${API}/api/post/${post._id}/responder`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ mensaje }),
+            });
+            if (r.ok) { alert('✅ Respuesta enviada'); cargarPosts(); }
+            else alert('❌ Error al enviar');
+          };
+
+          li.appendChild(form);
+        } else {
+          li.innerHTML += `
+            <div class="respuesta">
+              <p><strong>Respuesta:</strong></p>
+              <div>${post.respuesta.mensaje}</div>
+              <br/>
+              <div>
+                Estaremos atendiendo su solicitud con el ticket <strong>${post.respuesta.ticket}</strong>.<br/>
+                Saludos cordiales,<br/>
+                <strong>Administración</strong>
+              </div>
+              <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
+            </div>
+          `;
+        }
+        lista.appendChild(li);
+      });
+    }
+
+    cargarPosts();
+  </script>
 </body>
 </html>

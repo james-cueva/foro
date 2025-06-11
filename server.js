@@ -13,20 +13,24 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// 🔧 Aumentar el límite de carga del payload a 10MB (para texto enriquecido)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Conexión a MongoDB
+// Conexión a MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Conectado a MongoDB Atlas'))
   .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
 
-// Rutas
+// Rutas principales
 app.use('/api/auth', authRoutes);
 app.use('/api/post', postRoutes);
 
-// Ruta de prueba
+// Rutas de prueba
 app.get('/prueba-directa', (req, res) => {
   res.send('✅ Ruta directa funcionando');
 });
