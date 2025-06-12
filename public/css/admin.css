@@ -1,0 +1,100 @@
+/* admin.css */
+/* Estilos del panel de administrador */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7f9;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  background: #2c3e50;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  position: relative;
+}
+
+#cerrar-sesion {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.post {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,.05);
+}
+
+.mensaje {
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.usuario {
+  background: #eaf2f8;
+  border-left: 4px solid #2980b9;
+}
+
+.admin {
+  background: #e9f7ef;
+  border-left: 4px solid #28a745;
+}
+
+.ql-editor {
+  padding: 0;
+}
+
+.editor {
+  margin-top: 10px;
+  height: 150px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  width: auto;
+}
+
+button:hover {
+  background: #2980b9;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mensaje p, .mensaje div {
+  margin: 4px 0;
+}
+
+.mensaje footer {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #444;
+}

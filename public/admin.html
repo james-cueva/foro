@@ -1,3 +1,9 @@
+<!-- admin.html -->
+<!-- 
+  Descripción: Panel del administrador para gestionar y responder publicaciones de los usuarios.
+  Estilos: css/admin.css
+-->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,42 +11,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Administrador - Soporte Técnico</title>
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 0; }
-    .header { background: #2c3e50; color: white; padding: 25px; text-align: center; position: relative; }
-    #cerrar-sesion { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; }
-    #cerrar-sesion:hover { background: #c0392b; }
-    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    ul { list-style: none; padding: 0; }
-    li { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,.05); border-left: 5px solid #4CAF50; }
-    li h3 { margin-top: 0; color: #333; }
-    li p { margin: 8px 0; color: #555; }
-    .respuesta { background: #e9f7ef; padding: 15px; margin-top: 15px; border-left: 4px solid #28a745; border-radius: 6px; }
-    .respuesta p { margin: 6px 0; color: #2c3e50; }
-    .form-respuesta { margin-top: 15px; }
-    .ql-toolbar { background: #fafafa; border-radius: 4px 4px 0 0; }
-    .ql-container { height: 150px; border-radius: 0 0 4px 4px; }
-    form button { margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
-    form button:hover { background: #45a049; }
-  </style>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
   <div class="header">
     <h1>Panel de Administración - Soporte Técnico</h1>
     <button id="cerrar-sesion">Cerrar sesión</button>
   </div>
-  <div class="container">
-    <ul id="lista-posts"></ul>
-  </div>
 
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <div class="container" id="lista-posts"></div>
 
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <script>
     const token = localStorage.getItem('token');
-    const API = 'https://foro-1bo4.onrender.com';
-    const lista = document.getElementById('lista-posts');
+    const API = window.location.origin;
+    const contenedor = document.getElementById('lista-posts');
 
     if (!token) window.location.href = 'login.html';
+
     document.getElementById('cerrar-sesion').onclick = () => {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
@@ -67,60 +55,72 @@
         headers: { 'Authorization': 'Bearer ' + token },
       });
       const posts = await res.json();
-      lista.innerHTML = '';
+      contenedor.innerHTML = '';
+
       posts.forEach(post => {
-        const li = document.createElement('li');
-        li.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `
           <h3>${post.asunto}</h3>
-          <p>${post.descripcion}</p>
-          <p><small><strong>Usuario:</strong> ${post.usuario?.correo || 'No disponible'}</small></p>
-          <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
+          <div class="ql-editor">${post.descripcion}</div>
+          <p><strong>Usuario:</strong> ${post.usuario?.correo || 'Desconocido'}</p>
+          <p><strong>Ticket:</strong> ${post.ticket || 'Se generará cuando haya respuesta'}</p>
+          <p><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></p>
         `;
-        if (!post.respuesta) {
-          const form = document.createElement('form');
-          form.className = 'form-respuesta';
-          form.dataset.id = post._id;
 
-          const editorDiv = document.createElement('div');
-          editorDiv.style.margin = '10px 0';
-          form.appendChild(editorDiv);
+        post.mensajes.forEach(m => {
+          const divMsg = document.createElement('div');
+          divMsg.className = `mensaje ${m.esAdmin ? 'admin' : 'usuario'}`;
 
-          const button = document.createElement('button');
-          button.type = 'submit';
-          button.innerText = 'Responder';
-          form.appendChild(button);
-
-          const quill = crearEditor(editorDiv);
-
-          form.onsubmit = async e => {
-            e.preventDefault();
-            const mensaje = quill.root.innerHTML;
-            const r = await fetch(`${API}/api/post/${post._id}/responder`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-              body: JSON.stringify({ mensaje }),
-            });
-            if (r.ok) { alert('✅ Respuesta enviada'); cargarPosts(); }
-            else alert('❌ Error al enviar');
-          };
-
-          li.appendChild(form);
-        } else {
-          li.innerHTML += `
-            <div class="respuesta">
+          if (m.esAdmin) {
+            divMsg.innerHTML = `
               <p><strong>Respuesta:</strong></p>
-              <div>${post.respuesta.mensaje}</div>
-              <br/>
-              <div>
-                Estaremos atendiendo su solicitud con el ticket <strong>${post.respuesta.ticket}</strong>.<br/>
-                Saludos cordiales,<br/>
-                <strong>Administración</strong>
-              </div>
-              <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
-            </div>
-          `;
-        }
-        lista.appendChild(li);
+              <div class="ql-editor">${m.mensaje}</div>
+              <footer>
+                <p>Puede hacer el seguimiento de su solicitud a través del ticket <strong>${post.ticket}</strong>.</p>
+                <p>Saludos cordiales.<br><strong>Administración</strong></p>
+                <p><em>Respondido: ${new Date(m.creado).toLocaleString()}</em></p>
+              </footer>
+            `;
+          } else {
+            divMsg.innerHTML = `
+              <div class="ql-editor">${m.mensaje}</div>
+              <footer><em>Publicado: ${new Date(m.creado).toLocaleString()}</em></footer>
+            `;
+          }
+
+          div.appendChild(divMsg);
+        });
+
+        const form = document.createElement('form');
+        const editorDiv = document.createElement('div');
+        editorDiv.className = 'editor';
+        const boton = document.createElement('button');
+        boton.textContent = 'Responder';
+
+        form.onsubmit = async e => {
+          e.preventDefault();
+          const contenido = quill.root.innerHTML;
+          await fetch(`${API}/api/post/${post._id}/mensaje`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ mensaje: contenido })
+          });
+          cargarPosts();
+        };
+
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        group.appendChild(editorDiv);
+        form.appendChild(group);
+        form.appendChild(boton);
+        div.appendChild(form);
+
+        const quill = crearEditor(editorDiv);
+        contenedor.appendChild(div);
       });
     }
 

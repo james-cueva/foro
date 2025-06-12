@@ -1,9 +1,22 @@
+/**
+ * Rutas para Manejo de Posts
+ * ---------------------------
+ * Permite crear posts, verlos, y responder mediante un sistema de conversación continua.
+ * Protegido por el middleware de autenticación (verificarToken).
+ */
+
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 const verificarToken = require('../middlewares/verificarToken');
 
-// Crear post (solo usuarios logueados)
+/**
+ * POST /
+ * --------
+ * Crear un nuevo post (ticket).
+ * Requiere: asunto, descripción.
+ * Solo puede ser usado por un usuario autenticado.
+ */
 router.post('/', verificarToken, async (req, res) => {
   const { asunto, descripcion } = req.body;
 
@@ -26,58 +39,73 @@ router.post('/', verificarToken, async (req, res) => {
   }
 });
 
-// Obtener posts del usuario actual
+/**
+ * GET /mis-posts
+ * ----------------
+ * Devuelve los posts creados por el usuario autenticado.
+ * Incluye las respuestas en formato de conversación.
+ */
 router.get('/mis-posts', verificarToken, async (req, res) => {
   try {
-    const posts = await Post.find({ usuario: req.usuario.id }).sort({ creado: -1 });
+    const posts = await Post.find({ usuario: req.usuario.id })
+      .sort({ creado: -1 })
+      .populate('mensajes.autor', 'correo');
+
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Obtener todos los posts (solo administrador)
+/**
+ * GET /todos
+ * -------------
+ * Solo accesible por administradores.
+ * Devuelve todos los posts del sistema con usuarios y respuestas.
+ */
 router.get('/todos', verificarToken, async (req, res) => {
   if (!req.usuario.esAdmin) {
-    return res.status(403).json({ error: 'Acceso denegado: solo administradores' });
+    return res.status(403).json({ error: 'Acceso denegado' });
   }
 
   try {
-    const posts = await Post.find().populate('usuario', 'correo').sort({ creado: -1 });
+    const posts = await Post.find()
+      .populate('usuario', 'correo')
+      .populate('mensajes.autor', 'correo')
+      .sort({ creado: -1 });
+
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Responder a un post (solo administrador)
-router.post('/:id/responder', verificarToken, async (req, res) => {
-  if (!req.usuario.esAdmin) {
-    return res.status(403).json({ error: 'Acceso denegado: solo administradores' });
-  }
-
+/**
+ * POST /:id/mensaje
+ * -------------------
+ * Agrega un nuevo mensaje (respuesta) a un post existente.
+ * Si es la primera respuesta del admin, se genera un ticket.
+ */
+router.post('/:id/mensaje', verificarToken, async (req, res) => {
   const { mensaje } = req.body;
-  const ticket = 'TCKT-' + Math.floor(Math.random() * 1000000);
 
   try {
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Post no encontrado' });
 
-    if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+    // Si aún no tiene ticket y responde un admin, se genera
+    if (!post.ticket && req.usuario.esAdmin) {
+      post.ticket = 'TCKT-' + Math.floor(Math.random() * 1000000);
     }
 
-    if (post.respuesta) {
-      return res.status(400).json({ error: 'Este post ya tiene una respuesta' });
-    }
-
-    post.respuesta = {
+    post.mensajes.push({
       mensaje,
-      ticket,
-      creado: new Date()
-    };
+      autor: req.usuario.id,
+      esAdmin: req.usuario.esAdmin
+    });
 
     await post.save();
-    res.json({ mensaje: 'Respuesta enviada con éxito', ticket });
+    res.json({ mensaje: 'Mensaje agregado correctamente' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

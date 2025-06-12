@@ -1,3 +1,9 @@
+<!-- panel.html -->
+<!-- 
+  Descripción: Panel del usuario para crear posts y mantener conversaciones con soporte.
+  Estilos: css/panel.css
+-->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,53 +11,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Usuario - Soporte Técnico</title>
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 0; }
-    .header { background: #34495e; color: white; padding: 25px; text-align: center; position: relative; }
-    #cerrar-sesion {
-      display: inline-block;
-      width: auto;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #cerrar-sesion:hover { background: #c0392b; }
-    .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    form { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,.1); margin-bottom: 30px; }
-    input, button { display: block; width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 15px; }
-    button { background: #3498db; color: white; cursor: pointer; border: none; }
-    button:hover { background: #2980b9; }
-    .ql-toolbar { background: #fafafa; border-radius: 4px 4px 0 0; }
-    .ql-container { height: 150px; border-radius: 0 0 4px 4px; }
-    .post { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.05); }
-    .respuesta { margin-top: 10px; background: #eaf2f8; padding: 12px; border-radius: 6px; border-left: 4px solid #2980b9; }
-    .respuesta p { margin: 6px 0; color: #2c3e50; }
-  </style>
+  <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
   <div class="header">
-    <h1>Bienvenido al Panel de Usuario</h1>
+    <h1>Panel de Usuario - Soporte Técnico</h1>
     <button id="cerrar-sesion">Cerrar sesión</button>
   </div>
+
   <div class="container">
-    <form id="form-post">
-      <input type="text" id="asunto" placeholder="Asunto" required>
-      <div id="editor"></div>
+    <form id="form-post" class="post-form">
+      <div class="form-group">
+        <input type="text" id="asunto" placeholder="Asunto" required>
+        <div id="editor"></div>
+      </div>
       <button type="submit">Enviar Post</button>
     </form>
+
     <div id="mis-posts"></div>
   </div>
 
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <script>
-    const API = 'https://foro-1bo4.onrender.com';
     const token = localStorage.getItem('token');
+    const API = window.location.origin;
+
     if (!token) window.location.href = 'login.html';
 
     document.getElementById('cerrar-sesion').onclick = () => {
@@ -104,25 +88,82 @@
       const posts = await res.json();
       const contenedor = document.getElementById('mis-posts');
       contenedor.innerHTML = '';
+
       posts.forEach(post => {
         const div = document.createElement('div');
         div.className = 'post';
         div.innerHTML = `
           <h3>${post.asunto}</h3>
-          <div>${post.descripcion}</div>
-          <p><small><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></small></p>
+          <div class="ql-editor">${post.descripcion}</div>
+          <p><strong>Ticket:</strong> ${post.ticket || 'Se generará cuando haya respuesta'}</p>
+          <p><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></p>
         `;
-        if (post.respuesta) {
-          div.innerHTML += `
-            <div class="respuesta">
+
+        post.mensajes.forEach(m => {
+          const divMsg = document.createElement('div');
+          divMsg.className = `mensaje ${m.esAdmin ? 'admin' : 'usuario'}`;
+
+          if (m.esAdmin) {
+            divMsg.innerHTML = `
               <p><strong>Respuesta:</strong></p>
-              <div>${post.respuesta.mensaje}</div>
-              <br>
-              <p>Puede hacer el seguimiento de su solicitud a través del ticket <strong>${post.respuesta.ticket}</strong>.<br>Saludos cordiales.<br><strong>Administración</strong></p>
-              <p><small><em>Respondido el: ${new Date(post.respuesta.creado).toLocaleString()}</em></small></p>
-            </div>
-          `;
-        }
+              <div class="ql-editor">${m.mensaje}</div>
+              <footer>
+                <p>Puede hacer el seguimiento de su solicitud a través del ticket <strong>${post.ticket}</strong>.</p>
+                <p>Saludos cordiales.<br><strong>Administración</strong></p>
+                <p><em>Respondido: ${new Date(m.creado).toLocaleString()}</em></p>
+              </footer>
+            `;
+          } else {
+            divMsg.innerHTML = `
+              <div class="ql-editor">${m.mensaje}</div>
+              <footer><em>Publicado: ${new Date(m.creado).toLocaleString()}</em></footer>
+            `;
+          }
+
+          div.appendChild(divMsg);
+        });
+
+        const form = document.createElement('form');
+        const editorDiv = document.createElement('div');
+        editorDiv.className = 'editor';
+        const boton = document.createElement('button');
+        boton.textContent = 'Responder';
+
+        form.onsubmit = async e => {
+          e.preventDefault();
+          const contenido = quill.root.innerHTML;
+          await fetch(`${API}/api/post/${post._id}/mensaje`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ mensaje: contenido })
+          });
+          cargarPosts();
+        };
+
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        group.appendChild(editorDiv);
+        form.appendChild(group);
+        form.appendChild(boton);
+        div.appendChild(form);
+
+        const quill = new Quill(editorDiv, {
+          theme: 'snow',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline'],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }, { 'size': [] }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              ['link', 'image', 'video'],
+              ['clean']
+            ]
+          }
+        });
+
         contenedor.appendChild(div);
       });
     }
