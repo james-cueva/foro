@@ -3,13 +3,18 @@
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f4f7f9;
-  margin: 0;
-  padding: 0;
+  color: #333;
+  font-size: 16px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -31,13 +36,14 @@ body {
   color: #ecf0f1;
 }
 
+/* Contenedor centrado */
 .login-container {
   background: #ffffff;
   padding: 30px 40px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
   max-width: 400px;
+  width: 100%;
   margin: 40px auto;
 }
 
@@ -45,6 +51,7 @@ h2 {
   text-align: center;
   color: #333;
   margin-bottom: 20px;
+  font-size: 24px;
 }
 
 label {
@@ -60,7 +67,7 @@ input {
   margin-top: 6px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 input:focus {
@@ -69,15 +76,16 @@ input:focus {
 }
 
 button {
-  margin-top: 25px;
+  margin: 25px auto 0; /* top auto bottom (auto centra horizontalmente) */
   padding: 12px;
-  width: 100%;
   background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
+  width: auto;
+  display: block; /* necesario para que funcione margin: auto */
 }
 
 button:hover {
@@ -105,4 +113,63 @@ button:hover {
 
 .registro-link a:hover {
   text-decoration: underline;
+}
+
+/* Responsividad para móviles */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 17px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .header p {
+    font-size: 15px;
+  }
+
+  .login-container {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  input,
+  button {
+    font-size: 16px;
+  }
+
+  h2
+  {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-container {
+    padding: 15px;
+    margin: 10px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .header p {
+    font-size: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  button {
+    padding: 11px;
+    font-size: 15px;
+  }
+
+  .registro-link {
+    font-size: 13px;
+  }
 }

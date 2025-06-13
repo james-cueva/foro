@@ -6,6 +6,7 @@ body {
   background: #f4f7f9;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 .header {
@@ -18,20 +19,24 @@ body {
 
 #cerrar-sesion {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 6px;
+  right: 14px;
   background: #e74c3c;
   color: #fff;
   border: none;
-  padding: 10px 15px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  width: auto;
+  padding: 6px 10px; 
+  font-size: 14px;
+  line-height: 1; 
 }
 
 .container {
   max-width: 900px;
   margin: 40px auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .post {
@@ -40,6 +45,7 @@ body {
   margin-bottom: 30px;
   border-radius: 10px;
   box-shadow: 0 3px 6px rgba(0,0,0,.05);
+  overflow-x: auto;
 }
 
 .mensaje {
@@ -60,23 +66,27 @@ body {
 
 .ql-editor {
   padding: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .editor {
   margin-top: 10px;
-  height: 150px;
+  height: 120px;
+  width: 100%;
+  overflow: hidden;
 }
 
 button {
   margin-top: 10px;
-  padding: 10px 20px;
+  padding: 10px;
   background: #3498db;
   color: white;
   border: none;
   border-radius: 6px;
   font-size: 15px;
   cursor: pointer;
-  width: auto;
+  width: 14%;
 }
 
 button:hover {
@@ -89,7 +99,8 @@ button:hover {
   gap: 10px;
 }
 
-.mensaje p, .mensaje div {
+.mensaje p,
+.mensaje div {
   margin: 4px 0;
 }
 
@@ -97,4 +108,64 @@ button:hover {
   font-size: 14px;
   margin-top: 8px;
   color: #444;
+}
+
+/* Responsividad para móviles */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+
+  .header{
+    position: relative; /* permite posicionamiento absoluto interno */
+    height: 90px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    padding: 20px 10px;
+  }
+
+  #cerrar-sesion {
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  width: auto;
+  padding: 4px 8px; 
+  font-size: 12px;
+  line-height: 1;
+}
+
+  .container {
+    padding: 0 12px;
+    margin: 20px auto;
+  }
+
+  input,
+  button,
+  .editor {
+    font-size: 16px;
+  }
+
+  button{
+    width: 30%;
+  }
+
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  #cerrar-sesion {
+    font-size: 15px;
+    padding: 10px;
+    width: 140px;
+  }
 }

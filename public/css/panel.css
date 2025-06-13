@@ -6,32 +6,37 @@ body {
   background: #f4f7f9;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 .header {
   background: #34495e;
   color: white;
-  padding: 25px;
+  padding: 30px;
   text-align: center;
   position: relative;
 }
 
 #cerrar-sesion {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 6px;
+  right: 14px;
   background: #e74c3c;
   color: #fff;
   border: none;
-  padding: 10px 15px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  width: auto;
+  padding: 6px 10px; 
+  font-size: 14px;
+  line-height: 1; 
 }
 
 .container {
   max-width: 900px;
   margin: 40px auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 form.post-form {
@@ -40,6 +45,7 @@ form.post-form {
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,.1);
   margin-bottom: 30px;
+  overflow-x: hidden;
 }
 
 .form-group {
@@ -53,18 +59,19 @@ input[type="text"] {
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  width: 97.5%;
 }
 
 button {
   background: #3498db;
   color: white;
-  padding: 10px 20px;
+  padding: 10px;
   margin-top: 10px;
   border: none;
   border-radius: 6px;
   font-size: 15px;
   cursor: pointer;
-  width: auto;
+  width: 14%;
 }
 
 button:hover {
@@ -77,6 +84,7 @@ button:hover {
   margin-bottom: 30px;
   border-radius: 10px;
   box-shadow: 0 3px 6px rgba(0,0,0,.05);
+  overflow-x: auto;
 }
 
 .mensaje {
@@ -97,11 +105,16 @@ button:hover {
 
 .ql-editor {
   padding: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.editor, #editor {
-  height: 150px;
+.editor,
+#editor {
+  height: 120px;
   margin-top: 10px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .mensaje footer {
@@ -110,6 +123,76 @@ button:hover {
   color: #444;
 }
 
-.mensaje p, .mensaje div {
+.mensaje p,
+.mensaje div {
   margin: 4px 0;
+}
+
+/* Responsividad */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+
+  .header {
+    height: 55px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    padding: 12px 10px;
+    align-items: center;
+  }
+
+  #cerrar-sesion {
+    position: static;
+    display: block;
+    margin: 10px auto 0;
+    width: auto;
+    padding: 4px 8px; 
+    font-size: 12px;
+    line-height: 1; 
+  }
+
+  .container {
+    padding: 0 12px;
+    margin: 20px auto;
+  }
+
+  input,
+  button,
+  .editor,
+  #editor {
+    font-size: 16px;
+  }
+  input[type="text"]
+  {
+    width: 94%;
+  }
+  button{
+    width: 30%;
+  }
+  #cerrar-sesion {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  width: 120px;
+}
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  #cerrar-sesion {
+    font-size: 15px;
+    padding: 10px;
+    width: 140px;
+  }
 }
