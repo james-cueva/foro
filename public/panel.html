@@ -1,174 +1,41 @@
-<!-- panel.html -->
-<!-- 
-  Descripción: Panel del usuario para crear posts y mantener conversaciones con soporte.
-  Estilos: css/panel.css
--->
-
+<!-- public/panel.html -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Usuario - Soporte Técnico</title>
+  <title>Panel de Usuario - Soporte</title>
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <link rel="stylesheet" href="css/panel.css">
 </head>
+
 <body>
-  <div class="header">
-    <h1>Panel de Usuario - Soporte Técnico</h1>
+  <header class="header">
+    <h1>Panel de Usuario</h1>
     <button id="cerrar-sesion">Cerrar sesión</button>
-  </div>
+  </header>
 
-  <div class="container">
-    <form id="form-post" class="post-form">
-      <div class="form-group">
-        <input type="text" id="asunto" placeholder="Asunto" required>
+  <main class="main-container">
+    <section class="post-creator">
+      <form id="form-post">
+        <input type="text" id="asunto" placeholder="Asunto del post" required />
         <div id="editor"></div>
-      </div>
-      <button type="submit">Enviar Post</button>
-    </form>
+        <button type="submit">Enviar Post</button>
+      </form>
+    </section>
 
-    <div id="mis-posts"></div>
-  </div>
+    <section id="mis-posts" class="posts-list"></section>
+
+    <div class="pagination">
+      <button id="prev-page">Anterior</button>
+      <span id="page-indicator">Página 1</span>
+      <button id="next-page">Siguiente</button>
+    </div>
+  </main>
 
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-  <script>
-    const token = localStorage.getItem('token');
-    const API = window.location.origin;
-
-    if (!token) window.location.href = 'login.html';
-
-    document.getElementById('cerrar-sesion').onclick = () => {
-      localStorage.removeItem('token');
-      window.location.href = 'login.html';
-    };
-
-    const editor = new Quill('#editor', {
-      theme: 'snow',
-      modules: {
-        toolbar: [
-          ['bold', 'italic', 'underline'],
-          [{ 'color': [] }, { 'background': [] }],
-          [{ 'font': [] }, { 'size': [] }],
-          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-          ['link', 'image', 'video'],
-          ['clean']
-        ]
-      }
-    });
-
-    document.getElementById('form-post').onsubmit = async e => {
-      e.preventDefault();
-      const asunto = document.getElementById('asunto').value;
-      const descripcion = editor.root.innerHTML;
-
-      const res = await fetch(`${API}/api/post`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ asunto, descripcion })
-      });
-
-      if (res.ok) {
-        alert('✅ Post enviado');
-        document.getElementById('form-post').reset();
-        editor.root.innerHTML = '';
-        cargarPosts();
-      } else {
-        alert('❌ Error al enviar publicación');
-      }
-    };
-
-    async function cargarPosts() {
-      const res = await fetch(`${API}/api/post/mis-posts`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const posts = await res.json();
-      const contenedor = document.getElementById('mis-posts');
-      contenedor.innerHTML = '';
-
-      posts.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'post';
-        div.innerHTML = `
-          <h3>${post.asunto}</h3>
-          <div class="ql-editor">${post.descripcion}</div>
-          <p><strong>Ticket:</strong> ${post.ticket || 'Se generará cuando haya respuesta'}</p>
-          <p><em>Publicado: ${new Date(post.creado).toLocaleString()}</em></p>
-        `;
-
-        post.mensajes.forEach(m => {
-          const divMsg = document.createElement('div');
-          divMsg.className = `mensaje ${m.esAdmin ? 'admin' : 'usuario'}`;
-
-          if (m.esAdmin) {
-            divMsg.innerHTML = `
-              <p><strong>Respuesta:</strong></p>
-              <div class="ql-editor">${m.mensaje}</div>
-              <footer>
-                <p>Puede hacer el seguimiento de su solicitud a través del ticket <strong>${post.ticket}</strong>.</p>
-                <p>Saludos cordiales.<br><strong>Administración</strong></p>
-                <p><em>Respondido: ${new Date(m.creado).toLocaleString()}</em></p>
-              </footer>
-            `;
-          } else {
-            divMsg.innerHTML = `
-              <div class="ql-editor">${m.mensaje}</div>
-              <footer><em>Publicado: ${new Date(m.creado).toLocaleString()}</em></footer>
-            `;
-          }
-
-          div.appendChild(divMsg);
-        });
-
-        const form = document.createElement('form');
-        const editorDiv = document.createElement('div');
-        editorDiv.className = 'editor';
-        const boton = document.createElement('button');
-        boton.textContent = 'Responder';
-
-        form.onsubmit = async e => {
-          e.preventDefault();
-          const contenido = quill.root.innerHTML;
-          await fetch(`${API}/api/post/${post._id}/mensaje`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({ mensaje: contenido })
-          });
-          cargarPosts();
-        };
-
-        const group = document.createElement('div');
-        group.className = 'form-group';
-        group.appendChild(editorDiv);
-        form.appendChild(group);
-        form.appendChild(boton);
-        div.appendChild(form);
-
-        const quill = new Quill(editorDiv, {
-          theme: 'snow',
-          modules: {
-            toolbar: [
-              ['bold', 'italic', 'underline'],
-              [{ 'color': [] }, { 'background': [] }],
-              [{ 'font': [] }, { 'size': [] }],
-              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-              ['link', 'image', 'video'],
-              ['clean']
-            ]
-          }
-        });
-
-        contenedor.appendChild(div);
-      });
-    }
-
-    cargarPosts();
-  </script>
+  <script src="js/panel.js"></script>
 </body>
+
 </html>

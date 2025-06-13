@@ -1,171 +1,127 @@
-/* admin.css */
-/* Estilos del panel de administrador */
+/* public/css/admin.css */
 
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f4f7f9;
   margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
 }
 
 .header {
-  background: #2c3e50;
+  background-color: #1e2e3e;
   color: white;
-  padding: 25px;
-  text-align: center;
-  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  flex-wrap: wrap;
 }
 
-#cerrar-sesion {
-  position: absolute;
-  top: 6px;
-  right: 14px;
-  background: #e74c3c;
-  color: #fff;
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.header button {
+  background-color: #f44336;
   border: none;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: white;
   cursor: pointer;
-  font-size: 14px;
-  width: auto;
-  padding: 6px 10px; 
-  font-size: 14px;
-  line-height: 1; 
+  border-radius: 4px;
+  font-weight: bold;
 }
 
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 0 16px;
+.main-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: auto;
 }
 
-.post {
-  background: #fff;
-  padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-  box-shadow: 0 3px 6px rgba(0,0,0,.05);
-  overflow-x: auto;
+.posts-list .post {
+  background-color: white;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.posts-list .post h3 {
+  margin-top: 0;
+  color: #2a3f54;
 }
 
 .mensaje {
-  margin: 15px 0;
-  padding: 15px;
-  border-radius: 6px;
+  background-color: #f1f1f1;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  border-left: 4px solid #2a3f54;
+  border-radius: 4px;
 }
 
-.usuario {
-  background: #eaf2f8;
-  border-left: 4px solid #2980b9;
+.mensaje.admin {
+  border-color: #00695c;
+  background-color: #e0f2f1;
 }
 
-.admin {
-  background: #e9f7ef;
-  border-left: 4px solid #28a745;
+.mensaje.usuario {
+  border-color: #3949ab;
+  background-color: #e8eaf6;
 }
 
-.ql-editor {
-  padding: 0;
-  overflow-wrap: break-word;
-  word-break: break-word;
+form {
+  margin-top: 1rem;
 }
 
-.editor {
-  margin-top: 10px;
-  height: 120px;
-  width: 100%;
-  overflow: hidden;
+form .editor {
+  height: 150px;
+  margin-bottom: 1rem;
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px;
-  background: #3498db;
+form button {
+  background-color: #2a3f54;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 15px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
   cursor: pointer;
-  width: 14%;
+  font-size: 1rem;
 }
 
-button:hover {
-  background: #2980b9;
-}
-
-.form-group {
+.pagination {
+  text-align: center;
+  margin-top: 2rem;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.mensaje p,
-.mensaje div {
-  margin: 4px 0;
+.pagination button {
+  background-color: #2a3f54;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.mensaje footer {
-  font-size: 14px;
-  margin-top: 8px;
-  color: #444;
+#page-indicator {
+  font-weight: bold;
+  align-self: center;
+  font-size: 1rem;
 }
 
-/* Responsividad para móviles */
-
-@media (max-width: 768px) {
-  body {
-    font-size: 16px;
+@media (max-width: 600px) {
+  .header, .main-container {
+    padding: 1rem;
   }
 
-  .header{
-    position: relative; /* permite posicionamiento absoluto interno */
-    height: 90px;
+  .pagination {
+    flex-direction: column;
   }
 
-  .header h1 {
-    font-size: 20px;
-    padding: 20px 10px;
-  }
-
-  #cerrar-sesion {
-  position: absolute;
-  top: 4px;
-  right: 10px;
-  width: auto;
-  padding: 4px 8px; 
-  font-size: 12px;
-  line-height: 1;
-}
-
-  .container {
-    padding: 0 12px;
-    margin: 20px auto;
-  }
-
-  input,
-  button,
-  .editor {
-    font-size: 16px;
-  }
-
-  button{
-    width: 30%;
-  }
-
-}
-
-@media (max-width: 400px) {
-  .container {
-    padding: 10px;
-  }
-
-  .header h1 {
-    font-size: 18px;
-  }
-
-  #cerrar-sesion {
-    font-size: 15px;
-    padding: 10px;
-    width: 140px;
+  form button {
+    width: 100%;
   }
 }
